@@ -9,16 +9,15 @@
 
 // HEADERBEG
 typedef struct {
-    float pps;
+    float cpm;
     float decay;
 } OPT;
 // HEADEREND
 
 OPT opt = {     // HEADER
-    .pps = 10,
+    .cpm = 20,  // suona simile al fondo standard (nessuna relazione coi 0.2 µSv/h però)
     .decay = 0.95
 };
-
 
 
 
@@ -34,15 +33,15 @@ int parse_opt( int argc, char *argv[] ){  // HEADER
                     "  %s [opzioni]\n"
                     "opzioni:\n"
                     "  -h       indovina\n"
-                    "  -p pps   particelle per secondo, in media (default %f)\n"
+                    "  -p cpm   conteggi/minuto, in media (default %f)\n"
                     "  -d decay click decay (default %f)\n"
                     , basename
-                    , opt.pps
+                    , opt.cpm
                     , opt.decay
                 );
                 return 0;
             case 'p':
-                opt.pps = atof( optarg );
+                opt.cpm = atof( optarg );
                 break;
             case 'd':
                 opt.decay = atof( optarg );

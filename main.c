@@ -4,15 +4,16 @@
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include "parse_opt.h"
+#include <time.h>
 
 #undef NDEBUG
 #include <assert.h>
 
 
 
-//float rand_gauss (){
+//float rand_gauss(){
 //  // media 1 range 0,2
-//  assert ( sizeof ( int ) >= 4 );
+//  assert( sizeof( int ) >= 4 );
 //  float r = 0;
 //  r += rand();
 //  r += rand();
@@ -21,13 +22,18 @@
 //  return r / (2.0*RAND_MAX);
 //}
 
-void MyAudioCallback ( void * userdata, Uint8 * stream, int len_bytes ){
+
+
+void MyAudioCallback( void *userdata, Uint8 *stream, int len_bytes ){
 
     SDL_AudioSpec * have = (SDL_AudioSpec*) userdata;
 
     static int delay = 0;
     static float s = 0;
     static float c = 1;
+
+//    static time_t start = time(0);
+//    static int count = 0;
 
 
     short * frame = (short*)stream;
@@ -36,30 +42,36 @@ void MyAudioCallback ( void * userdata, Uint8 * stream, int len_bytes ){
         
         // "sleep" some time
         if( delay -- < 0 ){
-            // set next delay
-//            float r = rand_gauss ();
-            float r = rand () * (2.0/opt.pps) / RAND_MAX;
-//            fprintf( stderr, "r %f\n", r );
-            delay = have->freq * r;  // sec
-//            fprintf ( stderr, "%d\n", delay );
+            // prossimo ritardo in secondi
+//            float secs = rand_gauss();
+            float secs = rand()*(2.0/(opt.cpm/60))/RAND_MAX;
+//            fprintf( stderr, "secs %f\n", secs );
+            delay = have->freq * secs;
+//            fprintf( stderr, "%d\n", delay );
             // gen pulse
             c = 1;
             s = 0;
+
+//            count++;
+//            if(count==100){
+//                fprintf( stderr, "%d impulsi. dt %ld secs\n", count, time(0)-start );
+//                getchar();
+//            }
         }
 
         *frame = c * 32767;
 
         // reinsch/magic circle osc
-        c = (c - s * 0.2) * opt.decay;  // pulse decay
+        c = (c - s * 0.3) * opt.decay;  // pulse decay
         s += c;
     }
 }
 
 
 
-int main ( int argc, char * argv [] ){ 
+int main( int argc, char *argv[] ){ 
 
-    if( ! parse_opt ( argc, argv )) return 1;
+    if( ! parse_opt( argc, argv )) return 1;
     
     assert( 0 == SDL_Init( SDL_INIT_AUDIO ));
     atexit(SDL_Quit);
